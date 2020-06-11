@@ -31,7 +31,7 @@ func TestDb2Entity_Run(t *testing.T) {
 	v.Set("table", "test_history")
 
 	loggerOptions := log.LoggerOptions{}
-	logger := log.NewLogger(loggerOptions.WithDebug(true))
+	logger := log.NewZapLogger(loggerOptions.WithDebug(true))
 	tpl := templates.NewTextTpl()
 
 	dbConf := domainfile.NewDbConfig()
@@ -112,7 +112,7 @@ func TestDb2Entity_ErrWrite(t *testing.T) {
 	v.Set("table", "test_history")
 
 	loggerOptions := log.LoggerOptions{}
-	logger := log.NewLogger(loggerOptions.WithDebug(true))
+	logger := log.NewZapLogger(loggerOptions.WithDebug(true))
 	tpl := templates.NewTextTpl()
 
 	dbConf := domainfile.NewDbConfig()

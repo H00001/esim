@@ -101,13 +101,13 @@ func TestGetParDir(t *testing.T) {
 }
 
 func TestBackUpFile(t *testing.T) {
-	log.NewLogger()
+	log.NewZapLogger()
 	err := EsimBackUpFile(file)
 	assert.NoError(t, err)
 }
 
 func TestEsimRecoverFile(t *testing.T) {
-	log.NewLogger()
+	log.NewZapLogger()
 	err := EsimBackUpFile(file)
 	assert.NoError(t, err)
 	err = EsimRecoverFile(file)

@@ -63,7 +63,7 @@ func NewClient(os ...Option) *Client {
 		}
 
 		if onceClient.logger == nil {
-			onceClient.logger = log.NewLogger()
+			onceClient.logger = log.NewZapLogger()
 		}
 
 		onceClient.init()

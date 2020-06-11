@@ -13,7 +13,7 @@ import (
 func TestRPCPluginStructField_SortField(t *testing.T) {
 	writer := filedir.NewEsimWriter()
 
-	rpcPlugin := NewRPCPluginStructField(writer, log.NewLogger())
+	rpcPlugin := NewRPCPluginStructField(writer, log.NewZapLogger())
 	dir, err := filepath.Abs(".")
 	assert.Nil(t, err)
 	rpcPlugin.structDir = dir + "/example"

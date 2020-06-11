@@ -12,7 +12,7 @@ import (
 
 var cfgFile string
 var v = viper.New()
-var logger = log.NewLogger()
+var logger = log.NewZapLogger()
 
 // rootCmd represents the base command when called without any subcommands.
 var rootCmd = &cobra.Command{

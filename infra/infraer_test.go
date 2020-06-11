@@ -64,7 +64,7 @@ func provideA() { println("test") }
 `
 
 	infraer := NewInfraer(
-		WithIfacerLogger(log.NewLogger()),
+		WithIfacerLogger(log.NewZapLogger()),
 		WithIfacerWriter(filedir.NewEsimWriter()),
 		WithIfacerInfraInfo(NewInfo()),
 		WithIfacerExecer(pkg.NewNullExec()),

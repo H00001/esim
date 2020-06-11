@@ -9,7 +9,7 @@ import (
 )
 
 func TestDBColumnsInter_GetColumns(t *testing.T) {
-	logger := log.NewLogger()
+	logger := log.NewZapLogger()
 	dbcColumns := NewDBColumnsInter(logger)
 	dbConf := &DbConfig{
 		Host:     "localhost",

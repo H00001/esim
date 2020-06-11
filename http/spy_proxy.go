@@ -20,7 +20,7 @@ func newSpyProxy(logger log.Logger, name string) *spyProxy {
 	spyProxy := &spyProxy{}
 
 	if logger == nil {
-		spyProxy.log = log.NewLogger()
+		spyProxy.log = log.NewZapLogger()
 	} else {
 		spyProxy.log = logger
 	}

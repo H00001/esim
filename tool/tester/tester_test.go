@@ -19,7 +19,7 @@ const (
 
 var (
 	loggerOptions = log.LoggerOptions{}
-	logger        = log.NewLogger(loggerOptions.WithDebug(true))
+	logger        = log.NewZapLogger(loggerOptions.WithDebug(true))
 )
 
 func TestTesterReceive(t *testing.T) {

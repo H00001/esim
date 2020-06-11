@@ -14,7 +14,7 @@ import (
 
 var Log Logger
 
-type logger struct {
+type ZapLogger struct {
 	debug bool
 
 	json bool
@@ -26,10 +26,10 @@ type logger struct {
 
 type LoggerOptions struct{}
 
-type Option func(c *logger)
+type Option func(c *ZapLogger)
 
-func NewLogger(options ...Option) Logger {
-	logger := &logger{}
+func NewZapLogger(options ...Option) Logger {
+	logger := &ZapLogger{}
 
 	for _, option := range options {
 		option(logger)
@@ -74,82 +74,82 @@ func NewLogger(options ...Option) Logger {
 }
 
 func (LoggerOptions) WithDebug(debug bool) Option {
-	return func(l *logger) {
+	return func(l *ZapLogger) {
 		l.debug = debug
 	}
 }
 
 func (LoggerOptions) WithJSON(json bool) Option {
-	return func(l *logger) {
+	return func(l *ZapLogger) {
 		l.json = json
 	}
 }
 
-func (log *logger) Error(msg string) {
+func (log *ZapLogger) Error(msg string) {
 	log.logger.Error(msg)
 }
 
-func (log *logger) Debugf(template string, args ...interface{}) {
+func (log *ZapLogger) Debugf(template string, args ...interface{}) {
 	log.sugar.With(log.getArgs(context.TODO())...).Debugf(template, args...)
 }
 
-func (log *logger) Infof(template string, args ...interface{}) {
+func (log *ZapLogger) Infof(template string, args ...interface{}) {
 	log.sugar.With(log.getArgs(context.TODO())...).Infof(template, args...)
 }
 
-func (log *logger) Warnf(template string, args ...interface{}) {
+func (log *ZapLogger) Warnf(template string, args ...interface{}) {
 	log.sugar.With(log.getArgs(context.TODO())...).Warnf(template, args...)
 }
 
-func (log *logger) Errorf(template string, args ...interface{}) {
+func (log *ZapLogger) Errorf(template string, args ...interface{}) {
 	log.sugar.With(log.getArgs(context.TODO())...).Errorf(template, args...)
 }
 
-func (log *logger) DPanicf(template string, args ...interface{}) {
+func (log *ZapLogger) DPanicf(template string, args ...interface{}) {
 	log.sugar.With(log.getArgs(context.TODO())...).DPanicf(template, args...)
 }
 
-func (log *logger) Panicf(template string, args ...interface{}) {
+func (log *ZapLogger) Panicf(template string, args ...interface{}) {
 	log.sugar.With(log.getArgs(context.TODO())...).Panicf(template, args...)
 }
 
-func (log *logger) Fatalf(template string, args ...interface{}) {
+func (log *ZapLogger) Fatalf(template string, args ...interface{}) {
 	log.sugar.With(log.getArgs(context.TODO())...).Fatalf(template, args...)
 }
 
-func (log *logger) Debugc(ctx context.Context, template string, args ...interface{}) {
+func (log *ZapLogger) Debugc(ctx context.Context, template string, args ...interface{}) {
 	log.sugar.With(log.getArgs(ctx)...).Debugf(template, args...)
 }
 
-func (log *logger) Infoc(ctx context.Context, template string, args ...interface{}) {
+func (log *ZapLogger) Infoc(ctx context.Context, template string, args ...interface{}) {
 	log.sugar.With(log.getArgs(ctx)...).Infof(template, args...)
 }
 
-func (log *logger) Warnc(ctx context.Context, template string, args ...interface{}) {
+func (log *ZapLogger) Warnc(ctx context.Context, template string, args ...interface{}) {
 	log.sugar.With(log.getArgs(ctx)...).Warnf(template, args...)
 }
 
-func (log *logger) Errorc(ctx context.Context, template string, args ...interface{}) {
+func (log *ZapLogger) Errorc(ctx context.Context, template string, args ...interface{}) {
 	log.sugar.With(log.getArgs(ctx)...).Errorf(template, args...)
 }
 
-func (log *logger) DPanicc(ctx context.Context, template string, args ...interface{}) {
+func (log *ZapLogger) DPanicc(ctx context.Context, template string, args ...interface{}) {
 	log.sugar.With(log.getArgs(ctx)...).DPanicf(template, args...)
 }
 
-func (log *logger) Panicc(ctx context.Context, template string, args ...interface{}) {
+func (log *ZapLogger) Panicc(ctx context.Context, template string, args ...interface{}) {
 	log.sugar.With(log.getArgs(ctx)...).Panicf(template, args...)
 }
 
-func (log *logger) Fatalc(ctx context.Context, template string, args ...interface{}) {
+func (log *ZapLogger) Fatalc(ctx context.Context, template string, args ...interface{}) {
 	log.sugar.With(log.getArgs(ctx)...).Fatalf(template, args...)
 }
 
-func (log *logger) standardTimeEncoder(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
+func (log *ZapLogger) standardTimeEncoder(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
 	enc.AppendString(t.Format("2006-01-02 15:04:05"))
 }
 
-func (log *logger) getArgs(ctx context.Context) []interface{} {
+func (log *ZapLogger) getArgs(ctx context.Context) []interface{} {
 	args := make([]interface{}, 0)
 
 	args = append(args, "caller", log.getCaller(runtime.Caller(2)))
@@ -161,12 +161,12 @@ func (log *logger) getArgs(ctx context.Context) []interface{} {
 	return args
 }
 
-func (log *logger) getCaller(pc uintptr, file string, line int, ok bool) string {
+func (log *ZapLogger) getCaller(pc uintptr, file string, line int, ok bool) string {
 	return zapcore.NewEntryCaller(pc, file, line, ok).TrimmedPath()
 }
 
 // getTracerID get tracer_id from context.
-func (log *logger) getTracerID(ctx context.Context) string {
+func (log *ZapLogger) getTracerID(ctx context.Context) string {
 	sp := opentracing.SpanFromContext(ctx)
 	if sp != nil {
 		if jaegerSpanContext, ok := sp.Context().(jaeger.SpanContext); ok {

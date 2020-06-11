@@ -152,7 +152,7 @@ func NewEsimFactory(options ...Option) *EsimFactory {
 	}
 
 	if factory.logger == nil {
-		factory.logger = log.NewLogger()
+		factory.logger = log.NewZapLogger()
 	}
 
 	if factory.writer == nil {

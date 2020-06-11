@@ -73,7 +73,7 @@ func NewClient(options ...Option) *Client {
 		}
 
 		if onceClient.logger == nil {
-			onceClient.logger = elog.NewLogger()
+			onceClient.logger = elog.NewZapLogger()
 		}
 
 		onceClient.proxyNum = len(onceClient.proxyConn)

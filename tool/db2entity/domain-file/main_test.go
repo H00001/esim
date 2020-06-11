@@ -24,7 +24,7 @@ var (
 
 func TestMain(m *testing.M) {
 	loggerOptions := log.LoggerOptions{}
-	logger := log.NewLogger(loggerOptions.WithDebug(true))
+	logger := log.NewZapLogger(loggerOptions.WithDebug(true))
 
 	tpl := templates.NewTextTpl()
 

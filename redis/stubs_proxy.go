@@ -20,7 +20,7 @@ func newStubsProxy(logger log.Logger, name string) *stubsProxy {
 	stubsProxy := &stubsProxy{}
 
 	if logger == nil {
-		stubsProxy.log = log.NewLogger()
+		stubsProxy.log = log.NewZapLogger()
 	}
 
 	stubsProxy.name = name

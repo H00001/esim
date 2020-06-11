@@ -16,7 +16,7 @@ const (
 )
 
 func TestRwWatch(t *testing.T) {
-	logger := log.NewLogger()
+	logger := log.NewZapLogger()
 
 	fw := NewFsnotifyWatcher(WithFwLogger(logger))
 

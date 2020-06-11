@@ -23,7 +23,7 @@ var client *Client
 var logger log.Logger
 
 func TestMain(m *testing.M) {
-	logger = log.NewLogger()
+	logger = log.NewZapLogger()
 
 	pool, err := dockertest.NewPool("")
 	if err != nil {

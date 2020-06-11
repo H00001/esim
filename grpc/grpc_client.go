@@ -50,7 +50,7 @@ func NewClientOptions(options ...ClientOptional) *ClientOptions {
 	}
 
 	if clientOptions.logger == nil {
-		clientOptions.logger = log.NewLogger()
+		clientOptions.logger = log.NewZapLogger()
 	}
 
 	if clientOptions.conf == nil {

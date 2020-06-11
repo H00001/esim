@@ -35,7 +35,7 @@ func NewProxyFactory(options ...FactoryOption) *Factory {
 		}
 
 		if proxyFactory.logger == nil {
-			proxyFactory.logger = log.NewLogger()
+			proxyFactory.logger = log.NewZapLogger()
 		}
 	})
 

@@ -42,7 +42,7 @@ func NewMonitorProxy(options ...MonitorProxyOption) *MonitorProxy {
 	}
 
 	if monitorProxy.logger == nil {
-		monitorProxy.logger = log.NewLogger()
+		monitorProxy.logger = log.NewZapLogger()
 	}
 
 	if monitorProxy.tracer == nil {

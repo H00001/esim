@@ -45,7 +45,7 @@ type UserStruct struct {
 var db *sql.DB
 
 func TestMain(m *testing.M) {
-	logger := log.NewLogger()
+	logger := log.NewZapLogger()
 
 	pool, err := dockertest.NewPool("")
 	if err != nil {
@@ -154,7 +154,7 @@ func TestProxyPatternWithTwoInstance(t *testing.T) {
 		clientOptions.WithProxy(func() interface{} {
 			return NewMonitorProxy(
 				monitorProxyOptions.WithConf(memConfig),
-				monitorProxyOptions.WithLogger(log.NewLogger()))
+				monitorProxyOptions.WithLogger(log.NewZapLogger()))
 		}),
 	)
 
@@ -187,11 +187,11 @@ func TestMulProxyPatternWithOneInstance(t *testing.T) {
 	memConfig := config.NewMemConfig()
 	// memConfig.Set("debug", true)
 
-	spyProxy1 := newSpyProxy(log.NewLogger(), "spyProxy1")
-	spyProxy2 := newSpyProxy(log.NewLogger(), "spyProxy2")
+	spyProxy1 := newSpyProxy(log.NewZapLogger(), "spyProxy1")
+	spyProxy2 := newSpyProxy(log.NewZapLogger(), "spyProxy2")
 	monitorProxy := NewMonitorProxy(
 		monitorProxyOptions.WithConf(memConfig),
-		monitorProxyOptions.WithLogger(log.NewLogger()))
+		monitorProxyOptions.WithLogger(log.NewZapLogger()))
 
 	client := NewClient(
 		clientOptions.WithDbConfig([]DbConfig{test1Config}),
@@ -243,16 +243,16 @@ func TestMulProxyPatternWithTwoInstance(t *testing.T) {
 		clientOptions.WithConf(memConfig),
 		clientOptions.WithProxy(
 			func() interface{} {
-				return newSpyProxy(log.NewLogger(), "spyProxy1")
+				return newSpyProxy(log.NewZapLogger(), "spyProxy1")
 			},
 			func() interface{} {
-				return newSpyProxy(log.NewLogger(), "spyProxy2")
+				return newSpyProxy(log.NewZapLogger(), "spyProxy2")
 			},
 			func() interface{} {
 				monitorProxyOptions := MonitorProxyOptions{}
 				return NewMonitorProxy(
 					monitorProxyOptions.WithConf(memConfig),
-					monitorProxyOptions.WithLogger(log.NewLogger()))
+					monitorProxyOptions.WithLogger(log.NewZapLogger()))
 			},
 		),
 	)
@@ -293,10 +293,10 @@ func BenchmarkParallelGetDB(b *testing.B) {
 		clientOptions.WithDbConfig([]DbConfig{test1Config, test2Config}),
 		clientOptions.WithConf(memConfig),
 		clientOptions.WithProxy(func() interface{} {
-			spyProxy := newSpyProxy(log.NewLogger(), "spyProxy")
+			spyProxy := newSpyProxy(log.NewZapLogger(), "spyProxy")
 			spyProxy.NextProxy(NewMonitorProxy(
 				monitorProxyOptions.WithConf(memConfig),
-				monitorProxyOptions.WithLogger(log.NewLogger())))
+				monitorProxyOptions.WithLogger(log.NewZapLogger())))
 
 			return spyProxy
 		}),
@@ -328,10 +328,10 @@ func TestDummyProxy_Exec(t *testing.T) {
 		clientOptions.WithConf(memConfig),
 		clientOptions.WithProxy(
 			func() interface{} {
-				return newSpyProxy(log.NewLogger(), "spyProxy")
+				return newSpyProxy(log.NewZapLogger(), "spyProxy")
 			},
 		// func() interface{} {
-		//	return newDummyProxy(log.NewLogger(), "dummyProxy")
+		//	return newDummyProxy(log.NewZapLogger(), "dummyProxy")
 		// },
 		),
 	)
@@ -360,7 +360,7 @@ func TestClient_GetStats(t *testing.T) {
 			monitorProxyOptions := MonitorProxyOptions{}
 			return NewMonitorProxy(
 				monitorProxyOptions.WithConf(memConfig),
-				monitorProxyOptions.WithLogger(log.NewLogger()))
+				monitorProxyOptions.WithLogger(log.NewZapLogger()))
 		}),
 	)
 	ctx := context.Background()
@@ -401,7 +401,7 @@ func TestClient_TxCommit(t *testing.T) {
 			monitorProxyOptions := MonitorProxyOptions{}
 			return NewMonitorProxy(
 				monitorProxyOptions.WithConf(memConfig),
-				monitorProxyOptions.WithLogger(log.NewLogger()))
+				monitorProxyOptions.WithLogger(log.NewZapLogger()))
 		}),
 	)
 	ctx := context.Background()
@@ -437,7 +437,7 @@ func TestClient_TxRollBack(t *testing.T) {
 			monitorProxyOptions := MonitorProxyOptions{}
 			return NewMonitorProxy(
 				monitorProxyOptions.WithConf(memConfig),
-				monitorProxyOptions.WithLogger(log.NewLogger()))
+				monitorProxyOptions.WithLogger(log.NewZapLogger()))
 		}),
 	)
 	ctx := context.Background()

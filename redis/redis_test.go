@@ -17,7 +17,7 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	logger := log.NewLogger()
+	logger := log.NewZapLogger()
 
 	pool, err := dockertest.NewPool("")
 	if err != nil {
@@ -60,7 +60,7 @@ func TestGetProxyConn(t *testing.T) {
 			func() interface{} {
 				monitorProxyOptions := MonitorProxyOptions{}
 				return NewMonitorProxy(
-					monitorProxyOptions.WithLogger(log.NewLogger()),
+					monitorProxyOptions.WithLogger(log.NewZapLogger()),
 				)
 			},
 		),
@@ -88,7 +88,7 @@ func TestGetNotProxyConn(t *testing.T) {
 			func() interface{} {
 				monitorProxyOptions := MonitorProxyOptions{}
 				return NewMonitorProxy(
-					monitorProxyOptions.WithLogger(log.NewLogger()),
+					monitorProxyOptions.WithLogger(log.NewZapLogger()),
 				)
 			},
 		),
@@ -117,7 +117,7 @@ func TestMonitorProxy_Do(t *testing.T) {
 			func() interface{} {
 				monitorProxyOptions := MonitorProxyOptions{}
 				return NewMonitorProxy(
-					monitorProxyOptions.WithLogger(log.NewLogger()),
+					monitorProxyOptions.WithLogger(log.NewZapLogger()),
 				)
 			},
 		),
@@ -142,7 +142,7 @@ func TestMulLevelProxy_Do(t *testing.T) {
 	memConfig := config.NewMemConfig()
 	memConfig.Set("debug", true)
 
-	spyProxy := newSpyProxy(log.NewLogger(), "spyProxy")
+	spyProxy := newSpyProxy(log.NewZapLogger(), "spyProxy")
 
 	redisClent := NewClient(
 		redisClientOptions.WithConf(memConfig),
@@ -150,7 +150,7 @@ func TestMulLevelProxy_Do(t *testing.T) {
 			func() interface{} {
 				monitorProxyOptions := MonitorProxyOptions{}
 				return NewMonitorProxy(
-					monitorProxyOptions.WithLogger(log.NewLogger()),
+					monitorProxyOptions.WithLogger(log.NewZapLogger()),
 				)
 			},
 			func() interface{} {

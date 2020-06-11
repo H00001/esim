@@ -49,7 +49,7 @@ func NewClient(options ...Option) *Client {
 	}
 
 	if Client.logger == nil {
-		Client.logger = log.NewLogger()
+		Client.logger = log.NewZapLogger()
 	}
 
 	return Client

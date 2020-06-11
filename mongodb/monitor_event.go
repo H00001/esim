@@ -42,7 +42,7 @@ func NewMonitorEvent(options ...EventOption) MgoEvent {
 	}
 
 	if m.logger == nil {
-		m.logger = log.NewLogger()
+		m.logger = log.NewZapLogger()
 	}
 
 	if m.tracer == nil {

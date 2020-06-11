@@ -20,7 +20,7 @@ type filterProxy struct {
 func newFilterProxy() *filterProxy {
 	filterProxy := &filterProxy{}
 
-	filterProxy.logger = log.NewLogger()
+	filterProxy.logger = log.NewZapLogger()
 
 	return filterProxy
 }
@@ -48,7 +48,7 @@ type cacheProxy struct {
 func newCacheProxy() *cacheProxy {
 	cacheProxy := &cacheProxy{}
 
-	cacheProxy.logger = log.NewLogger()
+	cacheProxy.logger = log.NewZapLogger()
 
 	return cacheProxy
 }

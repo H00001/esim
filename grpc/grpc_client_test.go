@@ -32,7 +32,7 @@ func (s *server) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloRe
 }
 
 func TestMain(m *testing.M) {
-	logger = log.NewLogger()
+	logger = log.NewZapLogger()
 
 	lis, err := net.Listen(tcpAddr.Network(), tcpAddr.String())
 	if err != nil {

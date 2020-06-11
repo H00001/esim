@@ -36,7 +36,7 @@ func tearDown() {
 
 func TestLog(t *testing.T) {
 	loggerOptions := LoggerOptions{}
-	logger := NewLogger(loggerOptions.WithDebug(false))
+	logger := NewZapLogger(loggerOptions.WithDebug(false))
 
 	sp := tracer.StartSpan("test")
 	ctx := opentracing.ContextWithSpan(context.Background(), sp)
@@ -59,7 +59,7 @@ func Test_logger_getArgs(t *testing.T) {
 		ctx context.Context
 	}
 
-	log := new(logger)
+	log := new(ZapLogger)
 	sp := tracer.StartSpan("test")
 	jaegerCtx := opentracing.ContextWithSpan(context.Background(), sp)
 

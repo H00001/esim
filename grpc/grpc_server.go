@@ -70,7 +70,7 @@ func NewServer(target string, options ...ServerOption) *Server {
 	}
 
 	if Server.logger == nil {
-		Server.logger = log.NewLogger()
+		Server.logger = log.NewZapLogger()
 	}
 
 	if Server.conf == nil {

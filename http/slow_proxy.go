@@ -21,7 +21,7 @@ func newSlowProxy(logger log.Logger, name string) *slowProxy {
 	slowProxy := &slowProxy{}
 
 	if logger == nil {
-		slowProxy.log = log.NewLogger()
+		slowProxy.log = log.NewZapLogger()
 	} else {
 		slowProxy.log = logger
 	}

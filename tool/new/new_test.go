@@ -17,7 +17,7 @@ const (
 
 func TestProject_Run(t *testing.T) {
 	project := InitProject(
-		WithProjectLogger(log.NewLogger()),
+		WithProjectLogger(log.NewZapLogger()),
 		WithProjectWriter(filedir.NewEsimWriter()),
 		WithProjectTpl(templates.NewTextTpl()),
 	)
@@ -39,7 +39,7 @@ func TestProject_Run(t *testing.T) {
 
 func TestProject_ErrRun(t *testing.T) {
 	project := InitProject(
-		WithProjectLogger(log.NewLogger()),
+		WithProjectLogger(log.NewZapLogger()),
 		WithProjectWriter(filedir.NewErrWrite(3)),
 		WithProjectTpl(templates.NewTextTpl()),
 	)

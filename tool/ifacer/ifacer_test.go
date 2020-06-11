@@ -106,7 +106,7 @@ func TestIfacer_RunNullWrite(t *testing.T) {
 
 	writer := &filedir.NullWrite{}
 	ifacer := NewIfacer(
-		WithIfacerLogger(log.NewLogger()),
+		WithIfacerLogger(log.NewZapLogger()),
 		WithIfacerTpl(templates.NewTextTpl()),
 		WithIfacerWriter(writer),
 	)
@@ -128,7 +128,7 @@ func TestIfacer_Write(t *testing.T) {
 
 	writer := &filedir.EsimWriter{}
 	ifacer := NewIfacer(
-		WithIfacerLogger(log.NewLogger()),
+		WithIfacerLogger(log.NewZapLogger()),
 		WithIfacerTpl(templates.NewTextTpl()),
 		WithIfacerWriter(writer),
 	)
@@ -145,7 +145,7 @@ func TestIfacer_GetUniqueImportName(t *testing.T) {
 
 	writer := &filedir.NullWrite{}
 	ifacer := NewIfacer(
-		WithIfacerLogger(log.NewLogger()),
+		WithIfacerLogger(log.NewZapLogger()),
 		WithIfacerTpl(templates.NewTextTpl()),
 		WithIfacerWriter(writer),
 	)
@@ -185,7 +185,7 @@ func TestIfacer_SetNoConflictImport(t *testing.T) {
 
 	writer := &filedir.NullWrite{}
 	ifacer := NewIfacer(
-		WithIfacerLogger(log.NewLogger()),
+		WithIfacerLogger(log.NewZapLogger()),
 		WithIfacerTpl(templates.NewTextTpl()),
 		WithIfacerWriter(writer),
 	)

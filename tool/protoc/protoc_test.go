@@ -11,7 +11,7 @@ import (
 
 func TestProtoc_Run(t *testing.T) {
 	protocer := NewProtocer(
-		WithProtocLogger(log.NewLogger()),
+		WithProtocLogger(log.NewZapLogger()),
 	)
 
 	v := viper.New()
@@ -25,7 +25,7 @@ func TestProtoc_Run(t *testing.T) {
 
 func TestProtoc_ParsePkgName(t *testing.T) {
 	protocer := NewProtocer(
-		WithProtocLogger(log.NewLogger()),
+		WithProtocLogger(log.NewZapLogger()),
 	)
 
 	packName, err := protocer.parsePkgName("./helloworld/helloworld.proto")
@@ -35,7 +35,7 @@ func TestProtoc_ParsePkgName(t *testing.T) {
 
 func TestProtoc_NotPkgName(t *testing.T) {
 	protocer := NewProtocer(
-		WithProtocLogger(log.NewLogger()),
+		WithProtocLogger(log.NewZapLogger()),
 	)
 	_, err := protocer.parsePkgName("./helloworld/helloworld_not_pkg_name.proto")
 	assert.Error(t, err)
@@ -43,7 +43,7 @@ func TestProtoc_NotPkgName(t *testing.T) {
 
 func TestProtoc_ParseProtoPath(t *testing.T) {
 	protocer := NewProtocer(
-		WithProtocLogger(log.NewLogger()),
+		WithProtocLogger(log.NewZapLogger()),
 	)
 	protocer.fromProto = "./data/go/src/github.com/grpc/grpc/examples/helloworld.proto"
 	protocer.parseProtoPath()
