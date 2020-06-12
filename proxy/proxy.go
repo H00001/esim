@@ -58,14 +58,15 @@ func (pf *Factory) GetFirstInstance(realName string, realInstance interface{},
 	proxyInses := pf.GetInstances(realName, proxys...)
 
 	proxyNum := len(proxyInses)
-	if proxyNum > 0 {
-		firstProxy = proxyInses[0]
 
-		if realInstance != nil {
-			proxyInses[len(proxyInses)-1].(Proxy).NextProxy(realInstance)
-		}
-	} else {
-		firstProxy = realInstance
+	if proxyNum <= 0 {
+		return realInstance
+	}
+
+	firstProxy = proxyInses[0]
+
+	if realInstance != nil {
+		proxyInses[len(proxyInses)-1].(Proxy).NextProxy(realInstance)
 	}
 
 	return firstProxy
@@ -73,29 +74,31 @@ func (pf *Factory) GetFirstInstance(realName string, realInstance interface{},
 
 func (pf *Factory) GetInstances(realName string, proxys ...func() interface{}) []interface{} {
 	proxyNum := len(proxys)
-	var proxyInses []interface{}
-	if proxyNum > 0 {
-		proxyInses = make([]interface{}, proxyNum)
-		for k, proxyFunc := range proxys {
-			if _, ok := proxyFunc().(Proxy); !ok {
-				pf.logger.Panicf("[%s] not implement the Proxy interface", realName)
-			} else {
-				proxyInses[k] = proxyFunc()
-			}
-		}
 
-		for k, proxyIns := range proxyInses {
-			if proxyNum == 1 {
-				proxyIns.(Proxy).NextProxy(proxyInses[k])
-				pf.logger.Infof("[%s] %s init [%p]", realName, proxyIns.(Proxy).ProxyName(),
-					proxyIns)
-			} else if k+1 < proxyNum {
-				proxyIns.(Proxy).NextProxy(proxyInses[k+1])
-				pf.logger.Infof("[%s] %s init [%p]", realName, proxyIns.(Proxy).ProxyName(),
-					proxyIns)
-			} else {
-				continue
-			}
+	if proxyNum <= 0 {
+		return nil
+	}
+
+	proxyInses := make([]interface{}, proxyNum)
+	for k, proxyFunc := range proxys {
+		if _, ok := proxyFunc().(Proxy); !ok {
+			pf.logger.Panicf("[%s] not implement the Proxy interface", realName)
+		} else {
+			proxyInses[k] = proxyFunc()
+		}
+	}
+
+	for k, proxyIns := range proxyInses {
+		if proxyNum == 1 {
+			proxyIns.(Proxy).NextProxy(proxyInses[k])
+			pf.logger.Infof("[%s] %s init [%p]", realName, proxyIns.(Proxy).ProxyName(),
+				proxyIns)
+		} else if k+1 < proxyNum {
+			proxyIns.(Proxy).NextProxy(proxyInses[k+1])
+			pf.logger.Infof("[%s] %s init [%p]", realName, proxyIns.(Proxy).ProxyName(),
+				proxyIns)
+		} else {
+			continue
 		}
 	}
 

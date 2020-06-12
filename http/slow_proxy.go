@@ -18,15 +18,13 @@ type slowProxy struct {
 }
 
 func newSlowProxy(logger log.Logger, name string) *slowProxy {
-	slowProxy := &slowProxy{}
+	slowProxy := &slowProxy{name: name}
 
 	if logger == nil {
 		slowProxy.log = log.NewLogger()
 	} else {
 		slowProxy.log = logger
 	}
-
-	slowProxy.name = name
 
 	return slowProxy
 }

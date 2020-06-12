@@ -74,8 +74,7 @@ func (ClientOptions) WithLogger(logger log.Logger) Option {
 }
 
 func (c *Client) Do(ctx context.Context, req *http.Request) (*http.Response, error) {
-	resp, err := c.client.Do(req)
-	return resp, err
+	return c.client.Do(req)
 }
 
 func (c *Client) Get(ctx context.Context, addr string) (resp *http.Response, err error) {

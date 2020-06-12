@@ -44,6 +44,7 @@ var confFunc = func() config.Config {
 func SetConfFunc(conf func() config.Config) {
 	confFunc = conf
 }
+
 func provideConf() config.Config {
 	return confFunc()
 }
@@ -61,6 +62,7 @@ var prometheusFunc = func(conf config.Config, logger log.Logger) *prometheus.Pro
 func SetPrometheusFunc(pt func(config.Config, log.Logger) *prometheus.Prometheus) {
 	prometheusFunc = pt
 }
+
 func providePrometheus(conf config.Config, logger log.Logger) *prometheus.Prometheus {
 	return prometheusFunc(conf, logger)
 }
@@ -95,6 +97,7 @@ var tracerFunc = func(conf config.Config, logger log.Logger) opentracing.Tracer 
 func SetTracer(tracer func(config.Config, log.Logger) opentracing.Tracer) {
 	tracerFunc = tracer
 }
+
 func provideTracer(conf config.Config, logger log.Logger) opentracing.Tracer {
 	return tracerFunc(conf, logger)
 }

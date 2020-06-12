@@ -85,14 +85,11 @@ func (mp *MonitorProxy) ProxyName() string {
 }
 
 func (mp *MonitorProxy) Close() error {
-	err := mp.nextConn.Close()
-
-	return err
+	return mp.nextConn.Close()
 }
 
 func (mp *MonitorProxy) Err() (err error) {
-	err = mp.nextConn.Err()
-	return
+	return mp.nextConn.Err()
 }
 
 func (mp *MonitorProxy) Do(ctx context.Context, commandName string,

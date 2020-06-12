@@ -27,7 +27,5 @@ func NewPrometheus(httpAddr string, logger log.Logger) *Prometheus {
 }
 
 func NewNullProme() *Prometheus {
-	prome := &Prometheus{}
-
-	return prome
+	return new(Prometheus)
 }

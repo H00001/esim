@@ -162,28 +162,31 @@ func (m *MonitorEvent) withTracer(ctx context.Context, backEvent *mongoBackEvent
 	beginTime, endTime time.Time) {
 	execCommand, ok := ctx.Value("command").(*string)
 
-	if ok {
-		var commandName string
-		var errStr string
-
-		if backEvent.succEvent != nil {
-			commandName = backEvent.succEvent.CommandName
-		} else if backEvent.failedEvent != nil {
-			commandName = backEvent.failedEvent.CommandName
-			errStr = backEvent.failedEvent.Failure
-		}
-
-		if commandName != "" {
-			span := opentracing.GetSpan(ctx, m.tracer,
-				commandName, beginTime)
-			if errStr != "" {
-				span.SetTag("error", true)
-				span.LogKV("error_detailed", errStr)
-			}
-			span.LogKV("exec_command", *execCommand)
-			span.FinishWithOptions(opentracing2.FinishOptions{FinishTime: endTime})
-		}
+	if !ok {
+		return
 	}
+
+	var commandName string
+	var errStr string
+
+	if backEvent.succEvent != nil {
+		commandName = backEvent.succEvent.CommandName
+	} else if backEvent.failedEvent != nil {
+		commandName = backEvent.failedEvent.CommandName
+		errStr = backEvent.failedEvent.Failure
+	}
+
+	if commandName != "" {
+		span := opentracing.GetSpan(ctx, m.tracer,
+			commandName, beginTime)
+		if errStr != "" {
+			span.SetTag("error", true)
+			span.LogKV("error_detailed", errStr)
+		}
+		span.LogKV("exec_command", *execCommand)
+		span.FinishWithOptions(opentracing2.FinishOptions{FinishTime: endTime})
+	}
+
 }
 
 func (m *MonitorEvent) withMetrics(ctx context.Context, backEvent *mongoBackEvent,
@@ -206,13 +209,16 @@ func (m *MonitorEvent) withMetrics(ctx context.Context, backEvent *mongoBackEven
 func (m *MonitorEvent) withDebug(ctx context.Context, backEvent *mongoBackEvent,
 	beginTime, endTime time.Time) {
 	command, ok := ctx.Value("command").(*string)
-	if ok {
-		if backEvent.succEvent != nil {
-			m.logger.Debugf("mongodb success [%v] %s",
-				endTime.Sub(beginTime).String(), *command)
-		} else if backEvent.failedEvent != nil {
-			m.logger.Debugf("mongodb fail [%v] %s",
-				endTime.Sub(beginTime).String(), *command)
-		}
+
+	if !ok {
+		return
 	}
+	if backEvent.succEvent != nil {
+		m.logger.Debugf("mongodb success [%v] %s",
+			endTime.Sub(beginTime).String(), *command)
+	} else if backEvent.failedEvent != nil {
+		m.logger.Debugf("mongodb fail [%v] %s",
+			endTime.Sub(beginTime).String(), *command)
+	}
+
 }
