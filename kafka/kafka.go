@@ -51,7 +51,7 @@ func (ClientOptions) WithBokerList(b string) Option {
 		if err != nil {
 			log.Log.Errorf("kafka connect error:%v", err.Error())
 		}
-		hc.client.syncProcuder = syncProducer
+		hc.client.syncProducer = syncProducer
 
 		consumer, err := sarama.NewConsumer(brokerList, hc.client.config)
 		if err != nil {

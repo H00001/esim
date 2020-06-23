@@ -15,6 +15,10 @@ type Inbound struct {
 	consumer func(interface{})
 }
 
-func defaultDecorder(b []byte) interface{} {
+func defaultDecoder(b []byte) interface{} {
 	return string(b)
+}
+
+func defaultEncoder(i interface{}) []byte {
+	return []byte(i.(string))
 }
