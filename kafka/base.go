@@ -11,13 +11,17 @@ type KClient struct {
 	consumer      sarama.Consumer
 	consumerGroup sarama.ConsumerGroup
 	config        *sarama.Config
+	consumers     map[string]Inbound
+	tran          struct {
+		encoder sarama.Encoder
+	}
 }
 
-func (kc *Client) AsyncSend(topic string, msg string) (int32, int64, error) {
+func (kc *Client) AsyncSend(topic string, msg sarama.Encoder) (int32, int64, error) {
 	p := kc.client.asyncProducer
 	p.Input() <- &sarama.ProducerMessage{
 		Topic: topic,
-		Value: sarama.StringEncoder(msg),
+		Value: kc.client.tran.encoder,
 	}
 	select {
 	case res := <-p.Successes():
@@ -28,19 +32,19 @@ func (kc *Client) AsyncSend(topic string, msg string) (int32, int64, error) {
 	}
 }
 
-func (kc *Client) SyncSend(topic string, msg string) (int32, int64, error) {
+func (kc *Client) SyncSend(topic string, msg sarama.Encoder) (int32, int64, error) {
 	partition, offset, err := kc.client.syncProcuder.SendMessage(&sarama.ProducerMessage{
 		Topic: topic,
-		Value: sarama.StringEncoder(msg),
+		Value: msg,
 	})
 	return partition, offset, err
 }
 
-func (kc *Client) RecvMsg(topic string) (string, error) {
+func (kc *Client) RecvMsg(topic string, fn func(b []byte, e error) bool) {
 	partitions, err := kc.client.consumer.Partitions(topic)
 	if err != nil {
 		log.Fatalln(err.Error())
-		return "", err
+		fn(nil, err)
 	}
 	log.Infof("kafka receving msg from topic:%s,partitions:%v", topic, partitions)
 	for _, partition := range partitions {
@@ -51,10 +55,14 @@ func (kc *Client) RecvMsg(topic string) (string, error) {
 		}
 		select {
 		case res := <-partitionConsumer.Messages():
-			return string(sarama.StringEncoder(res.Value)), nil
+			fn(res.Value, nil)
 		case err := <-partitionConsumer.Errors():
-			return "", err
+			fn(nil, err)
 		}
 	}
-	return "", nil
+}
+
+func (c *Client) SetConsumer(topic string, consumer func(interface{})) {
+	b := Inbound{consumer: consumer, topic: topic, decoder: defaultDecorder}
+	c.client.consumers[topic] = b
 }

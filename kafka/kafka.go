@@ -75,7 +75,25 @@ func (ClientOptions) WithLogger(logger log.Logger) Option {
 
 func (ClientOptions) WithConfig(c *sarama.Config) Option {
 	return func(hc *Client) {
+		if c == nil {
+			c = new(sarama.Config)
+		}
+		c.Admin.Timeout = 20
+		c.Producer.MaxMessageBytes = 1024
+		c.Producer.Timeout = defaultTimeOut
+		c.Producer.Partitioner = sarama.NewHashPartitioner
+		c.Consumer.Fetch.Min = 10
+		c.Consumer.Fetch.Default = defaultMinFetch
+		c.Consumer.MaxWaitTime = 20 * time.Minute
+		c.Consumer.MaxProcessingTime = 20
+		c.Consumer.Offsets.CommitInterval = 10
+		c.Consumer.Offsets.Initial = sarama.OffsetOldest
+		c.Consumer.Group.Session.Timeout = 20 * time.Minute
+		c.Consumer.Group.Heartbeat.Interval = 1 * time.Minute
+		c.Consumer.Group.Rebalance.Strategy = &balanceStrategy{}
+		c.Consumer.Group.Rebalance.Timeout = 1 * time.Minute
 		hc.client.config = c
+
 	}
 }
 
@@ -109,5 +127,11 @@ func (ClientOptions) WithReadTimeOut(t time.Duration) Option {
 func (ClientOptions) WithWriteTimeOut(t time.Duration) Option {
 	return func(hc *Client) {
 		hc.client.config.Net.WriteTimeout = t
+	}
+}
+
+func (ClientOptions) WithConsumer(f func(b []byte)) Option {
+	return func(hc *Client) {
+		hc.client.config.Net.WriteTimeout = 110
 	}
 }

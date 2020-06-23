@@ -33,6 +33,6 @@ func TestMulLevelRoundTrip(t *testing.T) {
 		clientOptions.WithLogger(logger),
 		clientOptions.WithBokerList("123,45"),
 	)
-	httpClient.SyncSend("123", "456")
+	httpClient.SyncSend("123", sarama.StringEncoder("hello"))
 
 }
