@@ -15,7 +15,7 @@ type viperConf struct {
 
 	configType string
 
-	configFile []string
+	configFiles []string
 }
 
 type ViperConfOptions struct{}
@@ -36,30 +36,23 @@ func NewViperConfig(options ...Option) Config {
 	v := viper.New()
 	v.SetConfigType(viperConf.configType)
 
-	for k, configFile := range viperConf.configFile {
+	for k, configFile := range viperConf.configFiles {
+
+		content, err := ioutil.ReadFile(configFile)
+		if err != nil {
+			log.Panicf("Fatal error config file: %s \n", err.Error())
+		}
+
 		if k == 0 {
-			content, err := ioutil.ReadFile(configFile)
-			if err != nil {
-				log.Panicf("Fatal error config file: %s \n", err.Error())
-			}
-
 			err = v.ReadConfig(strings.NewReader(os.ExpandEnv(string(content))))
-			if err != nil { // Handle errors reading the config file
-				log.Panicf("Fatal error config file: %s \n", err.Error())
-			}
-		}
-
-		if k > 0 {
-			content, err := ioutil.ReadFile(configFile)
-			if err != nil {
-				log.Panicf("Fatal error config file: %s \n", err.Error())
-			}
-
+		} else {
 			err = v.MergeConfig(strings.NewReader(os.ExpandEnv(string(content))))
-			if err != nil { // Handle errors reading the config file
-				log.Panicf("Fatal error config file: %s \n", err.Error())
-			}
 		}
+
+		if err != nil { // Handle errors reading the config file
+			log.Panicf("Fatal error config file: %s \n", err.Error())
+		}
+
 	}
 	viperConf.Viper = v
 
@@ -74,7 +67,7 @@ func (ViperConfOptions) WithConfigType(configType string) Option {
 
 func (ViperConfOptions) WithConfFile(configFile []string) Option {
 	return func(l *viperConf) {
-		l.configFile = configFile
+		l.configFiles = configFile
 	}
 }
 

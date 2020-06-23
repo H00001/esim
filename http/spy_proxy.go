@@ -17,15 +17,13 @@ type spyProxy struct {
 }
 
 func newSpyProxy(logger log.Logger, name string) *spyProxy {
-	spyProxy := &spyProxy{}
+	spyProxy := &spyProxy{name: name}
 
 	if logger == nil {
 		spyProxy.log = log.NewLogger()
 	} else {
 		spyProxy.log = logger
 	}
-
-	spyProxy.name = name
 
 	return spyProxy
 }
