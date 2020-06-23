@@ -3,7 +3,6 @@ package kafka
 import (
 	"github.com/Shopify/sarama"
 	"github.com/prometheus/common/log"
-	"sync"
 )
 
 type KClient struct {
@@ -14,8 +13,8 @@ type KClient struct {
 	config        *sarama.Config
 }
 
-func (kc *KClient) asyncSend(topic string, msg string) (int32, int64, error) {
-	p := kc.asyncProducer
+func (kc *Client) AsyncSend(topic string, msg string) (int32, int64, error) {
+	p := kc.client.asyncProducer
 	p.Input() <- &sarama.ProducerMessage{
 		Topic: topic,
 		Value: sarama.StringEncoder(msg),
@@ -29,40 +28,33 @@ func (kc *KClient) asyncSend(topic string, msg string) (int32, int64, error) {
 	}
 }
 
-func (kc *KClient) syncSend(topic string, msg string) (int32, int64, error) {
-	partition, offset, err := kc.syncProcuder.SendMessage(&sarama.ProducerMessage{
+func (kc *Client) SyncSend(topic string, msg string) (int32, int64, error) {
+	partition, offset, err := kc.client.syncProcuder.SendMessage(&sarama.ProducerMessage{
 		Topic: topic,
 		Value: sarama.StringEncoder(msg),
 	})
 	return partition, offset, err
 }
 
-func (kc *KClient) recvMsg(topic string) {
-	partitions, err := kc.consumer.Partitions(topic)
+func (kc *Client) RecvMsg(topic string) (string, error) {
+	partitions, err := kc.client.consumer.Partitions(topic)
 	if err != nil {
 		log.Fatalln(err.Error())
-		return
+		return "", err
 	}
 	log.Infof("kafka receving msg from topic:%s,partitions:%v", topic, partitions)
-	var wg sync.WaitGroup
 	for _, partition := range partitions {
-		partitionConsumer, err := kc.consumer.ConsumePartition(topic, partition, sarama.OffsetNewest)
+		partitionConsumer, err := kc.client.consumer.ConsumePartition(topic, partition, sarama.OffsetNewest)
 		if err != nil {
-			log.Error("partitionConsumer err:", err)
+			log.Error("partition consumer err:", err)
 			continue
 		}
-		wg.Add(1)
-		go func(partitionConsumer sarama.PartitionConsumer) {
-			for {
-				select {
-				case res := <-partitionConsumer.Messages():
-					log.Error(sarama.StringEncoder(res.Value))
-				case err := <-partitionConsumer.Errors():
-					log.Error(err.Error())
-				}
-			}
-			wg.Done()
-		}(partitionConsumer)
+		select {
+		case res := <-partitionConsumer.Messages():
+			return string(sarama.StringEncoder(res.Value)), nil
+		case err := <-partitionConsumer.Errors():
+			return "", err
+		}
 	}
-	wg.Wait()
+	return "", nil
 }

@@ -4,6 +4,7 @@ import (
 	"github.com/Shopify/sarama"
 	"github.com/jukylin/esim/log"
 	"strings"
+	"time"
 )
 
 type Client struct {
@@ -72,8 +73,41 @@ func (ClientOptions) WithLogger(logger log.Logger) Option {
 	}
 }
 
+func (ClientOptions) WithConfig(c *sarama.Config) Option {
+	return func(hc *Client) {
+		hc.client.config = c
+	}
+}
+
 func (ClientOptions) WithErrors() Option {
 	return func(hc *Client) {
 		hc.client.config.Consumer.Return.Errors = true
+	}
+}
+
+func (ClientOptions) WithMaxOpenRequests(m int) Option {
+	return func(hc *Client) {
+		if m <= 0 {
+			m = 1
+		}
+		hc.client.config.Net.MaxOpenRequests = m
+	}
+}
+
+func (ClientOptions) WithDialTimeOut(t time.Duration) Option {
+	return func(hc *Client) {
+		hc.client.config.Net.DialTimeout = t
+	}
+}
+
+func (ClientOptions) WithReadTimeOut(t time.Duration) Option {
+	return func(hc *Client) {
+		hc.client.config.Net.ReadTimeout = t
+	}
+}
+
+func (ClientOptions) WithWriteTimeOut(t time.Duration) Option {
+	return func(hc *Client) {
+		hc.client.config.Net.WriteTimeout = t
 	}
 }

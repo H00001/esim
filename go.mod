@@ -3,6 +3,7 @@ module github.com/jukylin/esim
 go 1.13
 
 require (
+	github.com/Shopify/sarama v1.19.0
 	github.com/codahale/hdrhistogram v0.0.0-20161010025455-3a0bb77429bd // indirect
 	github.com/containerd/continuity v0.0.0-20200107194136-26c1120b8d41 // indirect
 	github.com/davecgh/go-spew v1.1.1
@@ -26,6 +27,7 @@ require (
 	github.com/ory/dockertest/v3 v3.5.4
 	github.com/prometheus/client_golang v1.1.0
 	github.com/prometheus/client_model v0.0.0-20190129233127-fd36f4220a90
+	github.com/prometheus/common v0.6.0
 	github.com/serenize/snaker v0.0.0-20171204205717-a683aaf2d516
 	github.com/spf13/cast v1.3.0
 	github.com/spf13/cobra v0.0.5
