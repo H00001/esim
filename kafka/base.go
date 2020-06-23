@@ -95,24 +95,21 @@ func (kc *Client) doConsumer(p sarama.PartitionConsumer, fn func(b []byte, e err
 	}
 }
 
-type ConsumerHandle struct {
-	wg *sync.WaitGroup
-}
-
-func (c *ConsumerHandle) join() {
-	c.wg.Wait()
-}
-
-func (kc *Client) loopConsume(topic string) (*ConsumerHandle, error) {
+func (kc *Client) loopConsume(topic string) (ConsumerHandle, error) {
 	partitions, _ := kc.client.consumer.Partitions(topic)
 	c := kc.client.consumers[topic]
+	ch := consumerHandle{}
 	wg := kc.consume(partitions, topic, true, false, func(b []byte, e error) bool {
 		v := c.decoder(b)
 		c.consumer(v)
+		con := ch.get()
+		if con == cancel {
+			return false
+		}
 		return true
+
 	})
-	ch := ConsumerHandle{wg: wg}
-	return &ch, nil
+	return NewConsumerHandle(wg), nil
 }
 
 func (kc *Client) SetConsumer(topic string, consumer func(interface{})) {
