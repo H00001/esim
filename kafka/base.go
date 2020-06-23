@@ -87,13 +87,9 @@ func (kc *Client) doConsumer(p sarama.PartitionConsumer, fn func(b []byte, e err
 		for !isComplete {
 			select {
 			case res := <-p.Messages():
-				if !fn(res.Value, nil) {
-					isComplete = false
-				}
+				isComplete = !fn(res.Value, nil)
 			case err := <-p.Errors():
-				if !fn(nil, err) {
-					isComplete = false
-				}
+				isComplete = !fn(nil, err)
 			}
 		}
 	}
