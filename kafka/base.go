@@ -52,7 +52,7 @@ func (kc *Client) ReceiveOnceMessage(topic string) ([]byte, error) {
 		data = b
 		err = e
 		return false
-	})
+	}).Wait()
 	return data, err
 }
 
@@ -69,10 +69,6 @@ func (kc *Client) consume(partitions []int32, topic string, parallel bool, s boo
 		} else {
 			kc.doConsumer(partitionConsumer, fn)(nil)
 		}
-	}
-	if s {
-		wg.Wait()
-		return nil
 	}
 	return &wg
 }
