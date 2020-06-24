@@ -59,5 +59,11 @@ func (c *consumerHandle) cancel() {
 }
 
 func (c *consumerHandle) get() control {
-	return <-c.ch
+	select {
+	case c := <-c.ch:
+		return c
+	default:
+		return next
+
+	}
 }
