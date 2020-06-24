@@ -48,7 +48,7 @@ func (kc *Client) ReceiveOnceMessage(topic string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	kc.consume(partitions, topic, false, true, func(b []byte, e error) bool {
+	kc.consume(partitions, topic, false, func(b []byte, e error) bool {
 		data = b
 		err = e
 		return false
@@ -56,7 +56,7 @@ func (kc *Client) ReceiveOnceMessage(topic string) ([]byte, error) {
 	return data, err
 }
 
-func (kc *Client) consume(partitions []int32, topic string, parallel bool, s bool, fn func(b []byte, e error) bool) *sync.WaitGroup {
+func (kc *Client) consume(partitions []int32, topic string, parallel bool, fn func(b []byte, e error) bool) *sync.WaitGroup {
 	wg := sync.WaitGroup{}
 	for _, partition := range partitions {
 		partitionConsumer, err := kc.client.consumer.ConsumePartition(topic, partition, sarama.OffsetNewest)
@@ -95,7 +95,7 @@ func (kc *Client) loopConsume(topic string) (ConsumerHandle, error) {
 	partitions, _ := kc.client.consumer.Partitions(topic)
 	c := kc.client.consumers[topic]
 	ch := consumerHandle{}
-	wg := kc.consume(partitions, topic, true, false, func(b []byte, e error) bool {
+	wg := kc.consume(partitions, topic, true, func(b []byte, e error) bool {
 		v := c.decoder(b)
 		c.consumer(v)
 		if ch.get() == cancel {
