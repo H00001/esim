@@ -19,7 +19,7 @@ type Option func(c *Client)
 
 type ClientOptions struct{}
 
-func NewClient(options ...Option) *Client {
+func NewClient(options ...Option) IkClient {
 	Client := &Client{
 		transports: make([]func() interface{}, 0),
 	}
