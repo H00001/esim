@@ -47,7 +47,7 @@ func (a *allocatorImpl) Alloc(length uint64) ByteBuffer {
 	if bf := a.findByUnusedList(length); bf != nil {
 		return bf
 	}
-	bf := new(lByteBuffer)
+	bf := new(linkedByteBuffer)
 	bf.Init(length, a)
 	return bf
 }
@@ -73,7 +73,7 @@ func (a *allocatorImpl) dynamicShrink() {
 
 }
 
-type lByteBuffer struct {
+type linkedByteBuffer struct {
 	BaseByteBuffer
 }
 

@@ -16,7 +16,7 @@ func NewSandBufferAllocator() Allocator {
 	return &alloc
 }
 
-func (s *sByteBuffer) Release() {
+func (s *standBlockByteBuffer) Release() {
 	s.a.release(s)
 }
 
@@ -53,7 +53,7 @@ func (d *divide) alloc() ByteBuffer {
 	for d.first == nil {
 		d.c.Wait()
 	}
-	v := d.first.(*sByteBuffer)
+	v := d.first.(*standBlockByteBuffer)
 	d.first = v.addLast(nil)
 	// pre allocator
 	if d.first == nil {
@@ -63,7 +63,7 @@ func (d *divide) alloc() ByteBuffer {
 	return v
 }
 
-func (d *divide) release(buffer *sByteBuffer) {
+func (d *divide) release(buffer *standBlockByteBuffer) {
 	d.l.Lock()
 	defer d.l.Unlock()
 	d.oper++
@@ -80,13 +80,13 @@ func (d *divide) Unlock() {
 	d.l.Unlock()
 }
 
-func (d *divide) setLink(sta *sByteBuffer) {
+func (d *divide) setLink(sta *standBlockByteBuffer) {
 	d.first = sta
 }
 
 func (d *divide) backAlloc() {
 	d.Lock()
-	result := make([]sByteBuffer, d.load)
+	result := make([]standBlockByteBuffer, d.load)
 	for i := 0; i < len(result); i++ {
 		result[i].init(d.s, d.a, d.index)
 		if i == len(result)-1 {
@@ -100,7 +100,7 @@ func (d *divide) backAlloc() {
 	d.c.Broadcast()
 }
 
-type sByteBuffer struct {
+type standBlockByteBuffer struct {
 	BaseByteBuffer
 	next    ByteBuffer
 	index   uint8
@@ -108,18 +108,18 @@ type sByteBuffer struct {
 	active  []bool
 }
 
-func (s *sByteBuffer) init(size uint64, all Allocator, index uint8) {
+func (s *standBlockByteBuffer) init(size uint64, all Allocator, index uint8) {
 	s.BaseByteBuffer.Init(size, all)
 	s.sumSize = size
 	s.active = make([]bool, 2)
 	s.index = index
 }
 
-func (s *sByteBuffer) Size() uint64 {
+func (s *standBlockByteBuffer) Size() uint64 {
 	return s.sumSize
 }
 
-func (s *sByteBuffer) addLast(buffer ByteBuffer) ByteBuffer {
+func (s *standBlockByteBuffer) addLast(buffer ByteBuffer) ByteBuffer {
 	p := s.next
 	s.next = buffer
 	return p
@@ -188,8 +188,8 @@ func (s *standAllocator) release(b ByteBuffer) {
 	release := b
 	next := release
 	for next != nil {
-		release = release.(*sByteBuffer).next
-		go func(n *sByteBuffer) { s.divs[n.index].release(n) }(next.(*sByteBuffer))
+		release = release.(*standBlockByteBuffer).next
+		go func(n *standBlockByteBuffer) { s.divs[n.index].release(n) }(next.(*standBlockByteBuffer))
 		next = release
 	}
 }
@@ -197,11 +197,11 @@ func (s *standAllocator) release(b ByteBuffer) {
 func (s *standAllocator) doAlloc(length uint64) ByteBuffer {
 	r := position(length)
 	//divide first
-	var b = s.divs[r[len(r)-1]].alloc().(*sByteBuffer)
+	var b = s.divs[r[len(r)-1]].alloc().(*standBlockByteBuffer)
 	l := b
 	for i := len(r) - 2; i >= 0; i-- {
 		l.next = s.divs[r[i]].alloc()
-		l = l.next.(*sByteBuffer)
+		l = l.next.(*standBlockByteBuffer)
 		b.sumSize += l.capital
 	}
 	return b
@@ -239,7 +239,7 @@ func (s *standAllocator) dynamicRegulate() {
 	}
 }
 
-func (s *sByteBuffer) Read(len uint64) ([]byte, error) {
+func (s *standBlockByteBuffer) Read(len uint64) ([]byte, error) {
 	if s.sumSize-s.RP < len {
 		return nil, errors.New(util.INDEX_OUTOF_BOUND)
 	}
@@ -248,11 +248,11 @@ func (s *sByteBuffer) Read(len uint64) ([]byte, error) {
 	return send, nil
 }
 
-func (s *sByteBuffer) ReadAll() ([]byte, error) {
+func (s *standBlockByteBuffer) ReadAll() ([]byte, error) {
 	return nil, nil
 }
 
-func (s *sByteBuffer) Read0(len, pos uint64, send []byte) {
+func (s *standBlockByteBuffer) Read0(len, pos uint64, send []byte) {
 	i := pos
 	for ; i < len; i++ {
 		if s.RP == s.capital {
@@ -261,11 +261,11 @@ func (s *sByteBuffer) Read0(len, pos uint64, send []byte) {
 		send[i] = util.ReadOne(s.s, &s.RP)
 	}
 	if i < len {
-		s.next.(*sByteBuffer).Read0(len, i, send)
+		s.next.(*standBlockByteBuffer).Read0(len, i, send)
 	}
 }
 
-func (s *sByteBuffer) Write(_b []byte) error {
+func (s *standBlockByteBuffer) Write(_b []byte) error {
 	if s.sumSize-s.WP < uint64(len(_b)) {
 		return errors.New(util.INDEX_OUTOF_BOUND)
 	}
@@ -273,7 +273,7 @@ func (s *sByteBuffer) Write(_b []byte) error {
 	return nil
 }
 
-func (s *sByteBuffer) Write0(_b []byte, position uint64) {
+func (s *standBlockByteBuffer) Write0(_b []byte, position uint64) {
 	i := position
 	for ; i < uint64(len(_b)); i++ {
 		if s.WP == s.capital {
@@ -282,35 +282,34 @@ func (s *sByteBuffer) Write0(_b []byte, position uint64) {
 		util.WriteOne(s.s, _b[i], &s.WP)
 	}
 	if i != uint64(len(_b)) {
-		s.next.(*sByteBuffer).Write0(_b, i)
+		s.next.(*standBlockByteBuffer).Write0(_b, i)
 	}
 }
 
-func (s *sByteBuffer) AvailableReadSum() uint64 {
+func (s *standBlockByteBuffer) AvailableReadSum() uint64 {
 	return s.globalWP(0) - s.globalRP(0) - 1
 }
 
-func (s *sByteBuffer) globalWP(now uint64) uint64 {
+func (s *standBlockByteBuffer) globalWP(now uint64) uint64 {
 	if s.WP != s.capital || s.next == nil {
 		return now + s.WP
-	} else {
-		return s.next.(*sByteBuffer).globalWP(now + s.capital)
 	}
+	return s.next.(*standBlockByteBuffer).globalWP(now + s.capital)
+
 }
 
-func (s *sByteBuffer) globalRP(now uint64) uint64 {
+func (s *standBlockByteBuffer) globalRP(now uint64) uint64 {
 	if s.WP != s.capital || s.next == nil {
 		return now + s.RP
-	} else {
-		return s.next.(*sByteBuffer).globalRP(now + s.capital)
 	}
+	return s.next.(*standBlockByteBuffer).globalRP(now + s.capital)
 }
 
-func (s *sByteBuffer) FastMoveOut() *[]byte {
-	panic("sByteBuffer method `FastMoveOut` not support!")
+func (s *standBlockByteBuffer) FastMoveOut() *[]byte {
+	panic("standBlockByteBuffer method `FastMoveOut` not support!")
 	return nil
 }
 
-func (s *sByteBuffer) FastMoveIn(*[]byte) {
-	panic("sByteBuffer method `FastMoveIn` not support!")
+func (s *standBlockByteBuffer) FastMoveIn(*[]byte) {
+	panic("standBlockByteBuffer method `FastMoveIn` not support!")
 }
