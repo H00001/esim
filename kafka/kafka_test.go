@@ -5,6 +5,7 @@ import (
 	"github.com/jukylin/esim/log"
 	"os"
 	"testing"
+	"time"
 )
 
 const (
@@ -34,5 +35,27 @@ func TestMulLevelRoundTrip(t *testing.T) {
 		clientOptions.WithBokerList("123,45"),
 	)
 	httpClient.SyncSend("123", sarama.StringEncoder("hello"))
+
+}
+
+func TestChannel(t *testing.T) {
+	ch := make(chan int, 1)
+	go func() {
+		for {
+			select {
+			case c, ok := <-ch:
+				if ok {
+					println(c)
+				} else {
+					println("error")
+				}
+			default:
+				println("def")
+			}
+		}
+	}()
+	time.Sleep(100)
+	ch <- 1
+	close(ch)
 
 }

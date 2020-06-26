@@ -92,6 +92,9 @@ func (ClientOptions) WithConfig(c *sarama.Config) Option {
 		c.Consumer.Group.Heartbeat.Interval = 1 * time.Minute
 		c.Consumer.Group.Rebalance.Strategy = &balanceStrategy{}
 		c.Consumer.Group.Rebalance.Timeout = 1 * time.Minute
+		c.ClientID = "default"
+		c.Producer.Return.Errors = true
+		c.Producer.Return.Successes = true
 		hc.client.config = c
 
 	}

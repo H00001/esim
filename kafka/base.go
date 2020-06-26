@@ -98,10 +98,7 @@ func (kc *Client) loopConsume(topic string) (ConsumerHandle, error) {
 	wg := kc.consume(partitions, topic, true, func(b []byte, e error) bool {
 		v := c.decoder(b)
 		c.consumer(v)
-		if ch.get() == cancel {
-			return false
-		}
-		return true
+		return ch.get()
 	})
 	return NewConsumerHandle(wg), nil
 }

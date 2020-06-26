@@ -8,3 +8,8 @@ type IkClient interface {
 	ReceiveOnceMessage(topic string) ([]byte, error)
 	SetConsumer(topic string, consumer func(interface{}))
 }
+
+type ConsumerHandle interface {
+	Join()
+	Cancel()
+}

@@ -10,11 +10,6 @@ const (
 
 type control int
 
-const (
-	next   control = 1
-	cancel         = 1 << 1
-)
-
 type DeCoder func([]byte) interface{}
 type EnCoder func(interface{}) []byte
 
@@ -32,38 +27,38 @@ func defaultEncoder(i interface{}) []byte {
 	return []byte(i.(string))
 }
 
-type ConsumerHandle interface {
-	join()
-	cancel()
-	get() control
-}
-
 type consumerHandle struct {
 	wg *sync.WaitGroup
-	ch chan control
+	ch chan bool
 }
 
 func NewConsumerHandle(wg *sync.WaitGroup) ConsumerHandle {
 	c := consumerHandle{}
 	c.wg = wg
-	c.ch = make(chan control, 2)
+	c.ch = make(chan bool, 1)
 	return &c
 }
 
-func (c *consumerHandle) join() {
+func (c *consumerHandle) Join() {
 	c.wg.Wait()
 }
 
-func (c *consumerHandle) cancel() {
-	c.ch <- cancel
+func (c *consumerHandle) Cancel() {
+	c.ch <- false
+	close(c.ch)
 }
 
-func (c *consumerHandle) get() control {
+func (c *consumerHandle) get() bool {
 	select {
-	case c := <-c.ch:
-		return c
+	case b, ok := <-c.ch:
+		{
+			if ok {
+				return b
+			} else {
+				return false
+			}
+		}
 	default:
-		return next
-
+		return true
 	}
 }
