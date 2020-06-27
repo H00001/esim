@@ -11,7 +11,7 @@ import (
 const MinBlock = 2
 
 func NewSandBufferAllocator() Allocator {
-	alloc := standAllocator{}
+	alloc := blockAllocator{}
 	_ = alloc.Init(20)
 	return &alloc
 }
@@ -108,10 +108,6 @@ type standBlockByteBuffer struct {
 	active  []bool
 }
 
-func (s *standBlockByteBuffer) Save(interface{}) {
-	panic("implement me")
-}
-
 func (s *standBlockByteBuffer) init(size uint64, all Allocator, index uint8) {
 	s.BaseByteBuffer.Init(size, all)
 	s.sumSize = size
@@ -129,7 +125,7 @@ func (s *standBlockByteBuffer) addLast(buffer ByteBuffer) ByteBuffer {
 	return p
 }
 
-type standAllocator struct {
+type blockAllocator struct {
 	divs  []divide
 	min   uint64
 	psize uint8
@@ -137,21 +133,23 @@ type standAllocator struct {
 	r     bool
 	max   uint64
 	regs  int64
+	s     time.Duration
 	w     sync.WaitGroup
 }
 
-func (s *standAllocator) Init(i uint64) error {
+func (s *blockAllocator) Init(i uint64) error {
 	// create alloc index
 	s.r = true
 	s.psize = uint8(i)
 	s.min = MinBlock
 	s.max = MinBlock<<s.psize - 1
 	s.divs = make([]divide, s.psize)
+	s.s = 10 * time.Second
 	s.w.Add(int(s.psize))
 	for i := range s.divs {
 		go func(vl *divide, index int) {
 			vl.Init(s, s.psize, uint8(index))
-			// at init process, don't need create threads.
+			// at init process,it don't need create threads.
 			vl.backAlloc()
 			s.w.Done()
 		}(&s.divs[i], i)
@@ -161,7 +159,7 @@ func (s *standAllocator) Init(i uint64) error {
 	return nil
 }
 
-func (s *standAllocator) OperatorTimes() uint64 {
+func (s *blockAllocator) OperatorTimes() uint64 {
 	var val uint64 = 0
 	for _, v := range s.divs {
 		val += v.oper
@@ -169,7 +167,7 @@ func (s *standAllocator) OperatorTimes() uint64 {
 	return val
 }
 
-func (s *standAllocator) Destroy() error {
+func (s *blockAllocator) Destroy() error {
 	s.r = false
 	for i := range s.divs {
 		s.divs[i].Destroy()
@@ -177,18 +175,18 @@ func (s *standAllocator) Destroy() error {
 	return nil
 }
 
-func (s *standAllocator) Alloc(length uint64) ByteBuffer {
+func (s *blockAllocator) Alloc(length uint64) ByteBuffer {
 	if length > s.max || length == 0 {
 		return nil
 	}
 	return s.doAlloc(length)
 }
 
-func (s *standAllocator) PoolSize() uint64 {
+func (s *blockAllocator) PoolSize() uint64 {
 	return util.Int2Uint64(int(s.psize))
 }
 
-func (s *standAllocator) release(b ByteBuffer) {
+func (s *blockAllocator) release(b ByteBuffer) {
 	release := b
 	next := release
 	for next != nil {
@@ -198,7 +196,7 @@ func (s *standAllocator) release(b ByteBuffer) {
 	}
 }
 
-func (s *standAllocator) doAlloc(length uint64) ByteBuffer {
+func (s *blockAllocator) doAlloc(length uint64) ByteBuffer {
 	r := position(length)
 	//divide first
 	var b = s.divs[r[len(r)-1]].alloc().(*standBlockByteBuffer)
@@ -215,7 +213,7 @@ func position(length uint64) []uint8 {
 	return util.IsPow2(length)
 }
 
-func (s *standAllocator) AllocSize() uint64 {
+func (s *blockAllocator) AllocSize() uint64 {
 	var val uint64 = 0
 	for _, v := range s.divs {
 		val += v.give
@@ -223,14 +221,14 @@ func (s *standAllocator) AllocSize() uint64 {
 	return val
 }
 
-func (s *standAllocator) dynamicRegulate() {
+func (s *blockAllocator) dynamicRegulate() {
 	c := util.NewCounter()
 	c.Boot()
 	for s.r {
 		for i := 0; i < len(s.divs); i++ {
 			c.Push(s.divs[i].oper)
 		}
-		time.Sleep(time.Second * 2)
+		time.Sleep(s.s)
 		ave := c.Ave()
 		for i := 0; i < len(s.divs); i++ {
 			if s.divs[i].oper <= ave {
@@ -310,10 +308,10 @@ func (s *standBlockByteBuffer) globalRP(now uint64) uint64 {
 }
 
 func (s *standBlockByteBuffer) FastMoveOut() *[]byte {
-	panic("standBlockByteBuffer method `FastMoveOut` not support!")
+	panic("method `FastMoveOut` of struct standBlockByteBuffer do not support!")
 	return nil
 }
 
-func (s *standBlockByteBuffer) FastMoveIn(*[]byte) {
-	panic("standBlockByteBuffer method `FastMoveIn` not support!")
+func (s *standBlockByteBuffer) FastMoveIn(_ *[]byte) {
+	panic("method `FastMoveIn` of struct standBlockByteBuffer do not support!")
 }

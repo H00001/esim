@@ -6,38 +6,38 @@ import (
 )
 
 func NewLikedBufferAllocator() Allocator {
-	a := allocatorImpl{}
+	a := linkedAllocator{}
 	if err := a.Init(0); err == nil {
 		return &a
 	}
 	return nil
 }
 
-type allocatorImpl struct {
+type linkedAllocator struct {
 	counter util.DynamicCounter
 	unUsed  *util.Skiplist
 	l       sync.Mutex
 }
 
-func (a *allocatorImpl) Init(uint64) error {
+func (a *linkedAllocator) Init(uint64) error {
 	a.unUsed = util.NewSkipList()
 	a.counter = util.NewCounter()
 	a.counter.Boot()
 	return nil
 }
 
-func (a *allocatorImpl) PoolSize() uint64 {
+func (a *linkedAllocator) PoolSize() uint64 {
 	return a.counter.Size()
 }
 
-func (a *allocatorImpl) Destroy() error {
+func (a *linkedAllocator) Destroy() error {
 	a.unUsed = nil
 	a.counter = nil
 	//help gc
 	return nil
 }
 
-func (a *allocatorImpl) Alloc(length uint64) ByteBuffer {
+func (a *linkedAllocator) Alloc(length uint64) ByteBuffer {
 	if length == 0 {
 		return nil
 	}
@@ -52,7 +52,7 @@ func (a *allocatorImpl) Alloc(length uint64) ByteBuffer {
 	return bf
 }
 
-func (a *allocatorImpl) findByUnusedList(i uint64) ByteBuffer {
+func (a *linkedAllocator) findByUnusedList(i uint64) ByteBuffer {
 	k, v := a.unUsed.Search(i)
 	if k != 0 {
 		a.unUsed.Delete(k)
@@ -61,7 +61,7 @@ func (a *allocatorImpl) findByUnusedList(i uint64) ByteBuffer {
 	return nil
 }
 
-func (a *allocatorImpl) release(buffer ByteBuffer) {
+func (a *linkedAllocator) release(buffer ByteBuffer) {
 	a.l.Lock()
 	a.counter.Push(-buffer.Size())
 	a.unUsed.Insert(buffer.Size(), buffer)
@@ -69,7 +69,7 @@ func (a *allocatorImpl) release(buffer ByteBuffer) {
 	go a.dynamicShrink()
 }
 
-func (a *allocatorImpl) dynamicShrink() {
+func (a *linkedAllocator) dynamicShrink() {
 
 }
 
@@ -77,10 +77,10 @@ type linkedByteBuffer struct {
 	BaseByteBuffer
 }
 
-func (a *allocatorImpl) OperatorTimes() uint64 {
+func (a *linkedAllocator) OperatorTimes() uint64 {
 	return a.counter.Size()
 }
 
-func (a *allocatorImpl) AllocSize() uint64 {
+func (a *linkedAllocator) AllocSize() uint64 {
 	return a.counter.Use()
 }

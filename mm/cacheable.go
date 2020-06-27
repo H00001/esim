@@ -25,7 +25,7 @@ type cacheing struct {
 	now  int
 	as   abandonStrategy
 	ss   saveStrategy
-	s1   revisitStrategy
+	rs   revisitStrategy
 }
 
 func (c *cacheing) Save(index key, i interface{}) {
@@ -68,7 +68,7 @@ func (c *cacheing) Init(i uint64) error {
 	c.as = func(ca *baseCaching) {
 		ca.rm(ca.tail)
 	}
-	c.s1 = func(bc *baseCaching, node *cacheNode) {
+	c.rs = func(bc *baseCaching, node *cacheNode) {
 		bc.rm(node)
 		bc.inputHead(node)
 		node.times++
@@ -89,7 +89,7 @@ func (c *cacheing) Get(index key) *CachOptional {
 	if !ok {
 		return new(CachOptional)
 	}
-	c.s1(&c.base, w)
+	c.rs(&c.base, w)
 
 	return &CachOptional{i: w.data}
 }
