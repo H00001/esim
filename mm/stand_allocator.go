@@ -108,6 +108,10 @@ type standBlockByteBuffer struct {
 	active  []bool
 }
 
+func (s *standBlockByteBuffer) Save(interface{}) {
+	panic("implement me")
+}
+
 func (s *standBlockByteBuffer) init(size uint64, all Allocator, index uint8) {
 	s.BaseByteBuffer.Init(size, all)
 	s.sumSize = size

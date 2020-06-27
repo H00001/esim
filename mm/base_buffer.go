@@ -33,7 +33,7 @@ type Allocator interface {
 type ByteBuffer interface {
 	ByteBufferDevelop
 	IOer
-	Cached
+	SetAlloc(Allocator)
 	Size() uint64
 	AvailableReadSum() uint64
 	Convert()
@@ -116,8 +116,8 @@ func (b *BaseByteBuffer) Reset() {
 	b.RP = 0
 }
 
-func (b *BaseByteBuffer) SetAlloc(i interface{}) {
-	b.a = i.(Allocator)
+func (b *BaseByteBuffer) SetAlloc(i Allocator) {
+	b.a = i
 }
 
 func (b *BaseByteBuffer) AvailableReadSum() uint64 {
